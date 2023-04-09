@@ -1,7 +1,6 @@
-FROM python:3.9-alpine
+FROM python:3.9
 
 WORKDIR /tmp
-
 COPY requirements.txt .
 
 ENV PYTHONUNBUFFERED=True \
