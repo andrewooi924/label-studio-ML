@@ -156,7 +156,7 @@ class LoadScreenshots:
 
 class LoadImages:
     # YOLOv8 image/video dataloader, i.e. `python detect.py --source image.jpg/vid.mp4`
-    def __init__(self, path, imgsz=640, stride=32, auto=True, transforms=None, vid_stride=1):
+    def __init__(self, path, imgsz=640, stride=32, auto=True, transforms=None, vid_stride=1, target_fps=None):
         if isinstance(path, str) and Path(path).suffix == ".txt":  # *.txt file with img/vid/dir on each line
             path = Path(path).read_text().rsplit()
         files = []
@@ -184,6 +184,7 @@ class LoadImages:
         self.auto = auto
         self.transforms = transforms  # optional
         self.vid_stride = vid_stride  # video frame-rate stride
+        self.target_fps = target_fps  # target video frame-rate
         if any(videos):
             self._new_video(videos[0])  # new video
         else:
@@ -199,12 +200,15 @@ class LoadImages:
         if self.count == self.nf:
             raise StopIteration
         path = self.files[self.count]
-
         if self.video_flag[self.count]:
             # Read video
             self.mode = 'video'
             for _ in range(self.vid_stride):
+                if self.target_fps: self.vid_stride_bias_skip += self.vid_stride_float
                 self.cap.grab()
+            if self.target_fps and self.vid_stride_bias_skip >= 1.0:
+                self.cap.grab()
+                self.vid_stride_bias_skip -= 1.0
             ret_val, im0 = self.cap.retrieve()
             while not ret_val:
                 self.count += 1
@@ -239,7 +243,20 @@ class LoadImages:
         # Create a new video capture object
         self.frame = 0
         self.cap = cv2.VideoCapture(path)
-        self.frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT) / self.vid_stride)
+        if self.target_fps:
+            orig_frame_rate = self.cap.get(cv2.CAP_PROP_FPS)
+            orig_length = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            target_length = round(orig_length / orig_frame_rate * self.target_fps)
+            
+            # updated video striding if fps is already defined
+            vid_stride = orig_length / target_length
+            self.vid_stride = int(vid_stride)
+            self.vid_stride_float = vid_stride % 1.0
+            self.vid_stride_bias_skip = 0
+
+            self.frames = int(target_length)
+        else:
+            self.frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT) / self.vid_stride)
         self.orientation = int(self.cap.get(cv2.CAP_PROP_ORIENTATION_META))  # rotation degrees
         # self.cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 0)  # disable https://github.com/ultralytics/yolov5/issues/8493
 

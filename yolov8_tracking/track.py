@@ -76,6 +76,7 @@ def run(
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
+        target_fps=None,  # output video fps
         retina_masks=False,
 ):
 
@@ -125,7 +126,8 @@ def run(
             stride=stride,
             auto=pt,
             transforms=getattr(model.model, 'transforms', None),
-            vid_stride=vid_stride
+            vid_stride=vid_stride,
+            target_fps=target_fps
         )
     vid_path, vid_writer, txt_path = [None] * bs, [None] * bs, [None] * bs
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
@@ -350,6 +352,7 @@ def parse_opt():
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
     parser.add_argument('--vid-stride', type=int, default=1, help='video frame-rate stride')
+    parser.add_argument('--target-fps',  type=int, default=None, help='specify target FPS for video')
     parser.add_argument('--retina-masks', action='store_true', help='whether to plot masks in native resolution')
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
