@@ -245,10 +245,10 @@ def run(
                         if save_txt:
                             # to MOT format
                             c = int(cls)
-                            bbox_left = output[0]
-                            bbox_top = output[1]
-                            bbox_w = output[2] - output[0]
-                            bbox_h = output[3] - output[1]
+                            bbox_left = output[0] / shape[0]
+                            bbox_top = output[1] / shape[1]
+                            bbox_w = (output[2] - output[0]) / shape[0]
+                            bbox_h = output[3] - output[1] / shape[1]
                             label  = f'{names[c]}' 
                             # Write MOT compliant results to file
                             # Modified to also have the label of the results
