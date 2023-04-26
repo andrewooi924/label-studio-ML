@@ -204,6 +204,7 @@ def run(
             if det is not None and len(det):
                 if is_seg:
                     shape = im0.shape
+                    img_height, img_width = shape[:2]
                     # scale bbox first the crop masks
                     if retina_masks:
                         det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], shape).round()  # rescale boxes to im0 size
