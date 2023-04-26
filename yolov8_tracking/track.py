@@ -256,7 +256,7 @@ def run(
                             # Write MOT compliant results to file
                             # Modified to also have the label of the results
                             with open(txt_path + '.txt', 'a') as f:
-                                f.write(('%g ' * 10 + '%s %s' + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
+                                f.write(('%g,' * 10 + '%s,%s' + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
                                                                bbox_top, bbox_w, bbox_h, -1, -1, -1, i, label, c))
 
                         if save_vid or save_crop or show_vid:  # Add bbox/seg to image
