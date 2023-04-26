@@ -245,10 +245,12 @@ def run(
                         if save_txt:
                             # to MOT format
                             c = int(cls)
-                            bbox_left = output[0] / shape[0]
-                            bbox_top = output[1] / shape[1]
-                            bbox_w = (output[2] - output[0]) / shape[0]
-                            bbox_h = output[3] - output[1] / shape[1]
+                            # shape - (height, width) - modified to fit 100 x 100 scale of label studio
+                            # drop bbox autoscaling
+                            bbox_top = (output[1] / img_height) * 100
+                            bbox_left = (output[0] / img_width) * 100
+                            bbox_w = ((output[2] - output[0]) / img_width) * 100
+                            bbox_h = ((output[3] - output[1]) / img_height) * 100
                             label  = f'{names[c]}' 
                             # Write MOT compliant results to file
                             # Modified to also have the label of the results
