@@ -81,14 +81,36 @@ class AssistedBoundingBox(LabelStudioMLBase):
         for task in tasks:
             predictions.append({
                 'result': [{
-                    'from_name': self.from_name,
-                    'to_name': self.to_name,
-                    'type': 'choices',
-                    'value': {
-                        'choices': [random.choice(self.labels)]
-                    }
-                }],
-                'score': 1
+          "value": {
+            "sequence": [
+              {
+                "frame": 1,
+                "rotation": 0,
+                "x": 42.8125,
+                "y": 51.24999999999999,
+                "height": 25.0,
+                "width": 12.5,
+                "enabled": True,
+              },
+              {
+                "x": 42.308932360204196,
+                "y": 51.72466015192493,
+                "width": 12.499999999999952,
+                "height": 25.000000000000128,
+                "rotation": -3.1363583683323393,
+                "frame": 7,
+                "enabled": False,
+              }
+            ],
+            "labels": [
+              "Person"
+            ]
+          },
+          "from_name": "box",
+          "to_name": "video",
+          "type": "videorectangle",
+          "origin": "yolov8"
+        }]
             })
         
         return predictions
