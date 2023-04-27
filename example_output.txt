@@ -5,6 +5,13 @@
   },
   "annotations": [],
   "predictions": [
+{
+  "id": 1906,
+  "data": {
+    "video_url": "/data/upload/1/97b45b4d-robbery1.mp4"
+  },
+  "annotations": [],
+  "predictions": [
     {
       "id": 284,
       "model_version": "1682522326",
@@ -52,3 +59,9 @@
     }
   ]
 }
+  ]
+}
+
+{'result': [{'value': {'sequence': [{'frame': 1, 'x': '38.125', 'y': '44.1667', 'width': '7.8125', 'height': '37.5', 'enabled': False}, {'frame': 4, 'x': '37.8125', 'y': '41.6667', 'width': '7.5', 'height': '41.25', 'enabled': False}], 'labels': ['parking meter']}, 'from_name': 'box', 'to_name': 'video', 'type': 'videorectangle', 'origin': 'yolov8'}]}
+
+{'result': [{'value': {'sequence': [{'frame': 1, 'rotation': 0, 'x': 42.8125, 'y': 51.24999999999999, 'height': 25.0, 'width': 12.5, 'enabled': True}, {'x': 42.308932360204196, 'y': 51.72466015192493, 'width': 12.499999999999952, 'height': 25.000000000000128, 'rotation': -3.1363583683323393, 'frame': 7, 'enabled': False}], 'labels': ['Person']}, 'from_name': 'box', 'to_name': 'video', 'type': 'videorectangle', 'origin': 'yolov8'}]}
