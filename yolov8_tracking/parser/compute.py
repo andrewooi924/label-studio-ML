@@ -2,12 +2,24 @@ class FrameData:
     def __init__(self, frame_id, id, x, y, w, h, label, label_id):
         self.frame_id = int(frame_id)
         self.id = int(id)
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.label = label
+        self.x = float(x)
+        self.y = float(y)
+        self.w = float(w)
+        self.h = float(h)
+
+        # Capitalize the first letter of the label
+        self.label = label.capitalize()
         self.label_id = int(label_id)
+
+    def generate_frame_json(self, interpolation=False):
+        return {
+            "frame": self.frame_id,
+            "x": self.x,
+            "y": self.y,
+            "width": self.w,
+            "height": self.h,
+            "enabled": interpolation
+        }
 
     def __str__(self):
         # Should be in JSON format
@@ -29,6 +41,8 @@ class Compute:
             line = line.strip()
             frame_id, id, x, y, w, h, _, _, _, _, label, label_id = line.split(",")
             frame = FrameData(frame_id, id, x, y, w, h, label, label_id)
+
+            # Grouping by two keys, namely frame_id and label_id
             if (frame.id, frame.label_id) not in cluster:
                 cluster[(frame.id, frame.label_id)] = []
             cluster[(frame.id, frame.label_id)].append(frame)
@@ -53,13 +67,58 @@ class Compute:
             grouped_cluster[(id, label_id)] = groups
         return grouped_cluster
 
+    def _generate_ls_json(self, grouped_cluster):
+        results = []
+        for (id, label_id), groups in grouped_cluster.items():
+            # Generate the result sequence for each id/label_id pair 
+            sequence = []
+            obj_name = None
+            for group in groups:
+                for i in range(len(group)):
+                    frame = group[i]
+
+                    # Get what is the label name for the object
+                    if obj_name is None:
+                        obj_name = frame.label
+
+                    # If there is only one frame, set interpolation to false always
+                    if len(group) == 1:
+                        sequence.append(frame.generate_frame_json(interpolation=False))
+                        continue
+                    
+                    # If there are more than 1 frames
+                    if i == len(group) - 1:
+                        # Set everything but the last frame to true for interpolation
+                        sequence.append(frame.generate_frame_json(interpolation=False))
+                    else:
+                        sequence.append(frame.generate_frame_json(interpolation=True))
+
+            # After getting the sequence, generate the correct result for 1 id/label_id pair
+            results.append({
+                    'value':{
+                        'sequence': sequence, 
+                        'labels': [ obj_name ] 
+                    },
+                    "from_name": "box",
+                    "to_name": "video",
+                    "type": "videorectangle",
+                    "origin": "yolov8"
+                })
+        return {
+            'result': results
+        }
+            
+                    
+
     def process(self):
         lines = self._read_file()
         cluster = self._group_by_id(lines)
         grouped_cluster = self._group_by_continuous_frames(cluster)
-        return grouped_cluster
+        self.pretty_print_grouped_cluster(grouped_cluster)
+        json_result = self._generate_ls_json(grouped_cluster)
+        return json_result
 
-    def pretty_print(self, grouped_cluster):
+    def pretty_print_grouped_cluster(self, grouped_cluster):
         for (id, label_id), groups in grouped_cluster.items():
             print(f"ID: {id}, Label ID: {label_id}")
             for group in groups:
@@ -70,7 +129,9 @@ class Compute:
 
 
 if __name__ == "__main__":
-    file_path = "test.txt"
+    file_path = "tests/test_large_input.txt"
     compute = Compute(file_path=file_path)
     res = compute.process()
-    compute.pretty_print(res)
+
+    print(res)
+    # compute.pretty_print(res)
