@@ -18,7 +18,7 @@ class FrameData:
             "y": self.y,
             "width": self.w,
             "height": self.h,
-            "enabled": interpolation
+            "enabled": interpolation,
         }
 
     def __str__(self):
@@ -70,7 +70,7 @@ class Compute:
     def _generate_ls_json(self, grouped_cluster):
         results = []
         for (id, label_id), groups in grouped_cluster.items():
-            # Generate the result sequence for each id/label_id pair 
+            # Generate the result sequence for each id/label_id pair
             sequence = []
             obj_name = None
             for group in groups:
@@ -85,7 +85,7 @@ class Compute:
                     if len(group) == 1:
                         sequence.append(frame.generate_frame_json(interpolation=False))
                         continue
-                    
+
                     # If there are more than 1 frames
                     if i == len(group) - 1:
                         # Set everything but the last frame to true for interpolation
@@ -94,21 +94,16 @@ class Compute:
                         sequence.append(frame.generate_frame_json(interpolation=True))
 
             # After getting the sequence, generate the correct result for 1 id/label_id pair
-            results.append({
-                    'value':{
-                        'sequence': sequence, 
-                        'labels': [ obj_name ] 
-                    },
+            results.append(
+                {
+                    "value": {"sequence": sequence, "labels": [obj_name]},
                     "from_name": "box",
                     "to_name": "video",
                     "type": "videorectangle",
-                    "origin": "yolov8"
-                })
-        return {
-            'result': results
-        }
-            
-                    
+                    "origin": "yolov8",
+                }
+            )
+        return {"result": results}
 
     def process(self):
         lines = self._read_file()
@@ -127,11 +122,12 @@ class Compute:
                     print(frame, sep=" ")
             print("\n")
 
-
+import json
 if __name__ == "__main__":
-    file_path = "tests/test_large_input.txt"
+    file_path = "tests/inputs/test_very_large_input.txt"
     compute = Compute(file_path=file_path)
     res = compute.process()
-
+    # write to file
+    with open("tests/outputs/test_very_large_output.json", "w") as f:
+        json.dump(res, f)
     print(res)
-    # compute.pretty_print(res)
