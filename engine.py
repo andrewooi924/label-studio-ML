@@ -7,7 +7,7 @@ import shutil
 import uuid
 
 class AssistedBoundingBox(LabelStudioMLBase):
-  """ Assisted Bounding Box labelling
+  """ Assisted Bounding Box Labelling Logic
   - This model helps our frontend to label the videos with the generated bounding boxes for the frontend. 
   - The format of the prediction is as follows
 
