@@ -4,8 +4,7 @@ from parser.compute import Compute
 from pathlib import Path
 from subprocess import run
 import shutil
-
-DIR_PREFIX = "tmp"
+import uuid
 
 class AssistedBoundingBox(LabelStudioMLBase):
   """ Assisted Bounding Box labelling
@@ -68,6 +67,8 @@ class AssistedBoundingBox(LabelStudioMLBase):
 
   def _run_tracker(self, vid_path):
     results = []
+    DIR_PREFIX = uuid.uuid4()
+
     try:
         Path(DIR_PREFIX).mkdir(parents=True, exist_ok=True)
         bucket_name, video_path, video_name = get_metadata_from_url(vid_path)
