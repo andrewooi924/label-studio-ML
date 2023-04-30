@@ -79,7 +79,7 @@ class AssistedBoundingBox(LabelStudioMLBase):
         command = f"python3 yolov8_tracking/track.py --source {video_destination} --save-txt --save-txt-path {model_output_destination}"
         run(command.split(), check=True)
 
-        results = Compute(str(model_output_destination) + ".txt")
+        results = Compute(str(model_output_destination) + ".txt").process()
     except Exception as e:
         print("Error in running tracker with error: " + e)
     finally:
