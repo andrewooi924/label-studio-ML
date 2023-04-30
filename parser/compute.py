@@ -31,7 +31,7 @@ class Compute:
         self.file_path = file_path
 
     def _read_file(self):
-        with open(file_path) as f:
+        with open(self.file_path) as f:
             lines = f.readlines()
         return lines
 
@@ -109,7 +109,6 @@ class Compute:
         lines = self._read_file()
         cluster = self._group_by_id(lines)
         grouped_cluster = self._group_by_continuous_frames(cluster)
-        self.pretty_print_grouped_cluster(grouped_cluster)
         json_result = self._generate_ls_json(grouped_cluster)
         return json_result
 
@@ -121,13 +120,3 @@ class Compute:
                 for frame in group:
                     print(frame, sep=" ")
             print("\n")
-
-import json
-if __name__ == "__main__":
-    file_path = "tests/inputs/test_very_large_input.txt"
-    compute = Compute(file_path=file_path)
-    res = compute.process()
-    # write to file
-    with open("tests/outputs/test_very_large_output.json", "w") as f:
-        json.dump(res, f)
-    print(res)

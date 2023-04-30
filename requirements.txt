@@ -1,5 +1,6 @@
-click==8.1.3
-label-studio-ml== 1.0.9
-rq==1.13.0
-supervisor==4.2.5
-uwsgi==2.0.21
+click
+label-studio-ml
+rq
+supervisor
+uwsgi
+google-cloud-storage
