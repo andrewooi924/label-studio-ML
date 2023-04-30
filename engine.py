@@ -67,7 +67,7 @@ class AssistedBoundingBox(LabelStudioMLBase):
 
   def _run_tracker(self, vid_path):
     results = []
-    DIR_PREFIX = uuid.uuid4()
+    DIR_PREFIX = str(uuid.uuid4())
 
     try:
         Path(DIR_PREFIX).mkdir(parents=True, exist_ok=True)
