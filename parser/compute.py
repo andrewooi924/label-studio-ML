@@ -70,30 +70,21 @@ class Compute:
     def _generate_ls_json(self, grouped_cluster):
         results = []
         for (id, label_id), groups in grouped_cluster.items():
-            # Generate the result sequence for each id/label_id pair
             sequence = []
             obj_name = None
             for group in groups:
                 for i in range(len(group)):
                     frame = group[i]
 
-                    # Get what is the label name for the object
                     if obj_name is None:
                         obj_name = frame.label
 
-                    # If there is only one frame, set interpolation to false always
                     if len(group) == 1:
                         sequence.append(frame.generate_frame_json(interpolation=False))
                         continue
+                    is_last = i == len(group) - 1
+                    sequence.append(frame.generate_frame_json(interpolation=(not is_last)))
 
-                    # If there are more than 1 frames
-                    if i == len(group) - 1:
-                        # Set everything but the last frame to true for interpolation
-                        sequence.append(frame.generate_frame_json(interpolation=False))
-                    else:
-                        sequence.append(frame.generate_frame_json(interpolation=True))
-
-            # After getting the sequence, generate the correct result for 1 id/label_id pair
             results.append(
                 {
                     "value": {"sequence": sequence, "labels": [obj_name]},
