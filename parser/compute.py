@@ -68,6 +68,7 @@ class Compute:
         return grouped_cluster
 
     def _generate_ls_json(self, grouped_cluster):
+        import random
         results = []
         for (id, label_id), groups in grouped_cluster.items():
             sequence = []
@@ -84,6 +85,10 @@ class Compute:
                         continue
                     is_last = i == len(group) - 1
                     sequence.append(frame.generate_frame_json(interpolation=(not is_last)))
+
+            # Randomly sample from sequence, while keeping first and last frame
+            random_frames = random.sample(sequence[1:-1], min(len(sequence) - 2, 5))
+            sequence = [sequence[0]] + random_frames + [sequence[-1]]
 
             results.append(
                 {
