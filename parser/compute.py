@@ -68,14 +68,12 @@ class Compute:
         return grouped_cluster
 
     def _generate_ls_json(self, grouped_cluster):
-        import random
         results = []
         for (id, label_id), groups in grouped_cluster.items():
             sequence = []
             obj_name = None
             for group in groups:
-                # Randomly sample from groups while preserving the first and last frame
-                group = [group[0]] + random.sample(group[1:-1], 1) + [group[-1]]
+
                 for i in range(len(group)):
                     frame = group[i]
 
