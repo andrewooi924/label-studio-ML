@@ -77,10 +77,6 @@ class Compute:
             obj_name = None
             for group in groups:
 
-                # Randomly sample 70% frames between first and last one
-                if len(group) > 4:
-                    group = random.sample(group[1:-1], int(len(group) * 0.7)) 
-
                 for i in range(len(group)):
                     frame = group[i]
 
