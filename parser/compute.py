@@ -1,5 +1,6 @@
 import random
 
+
 class FrameData:
     def __init__(self, frame_id, id, x, y, w, h, label, label_id):
         self.frame_id = int(frame_id)
@@ -29,7 +30,6 @@ class FrameData:
 
 
 class Compute:
-
     def __init__(self, file_path=None):
         self.file_path = file_path
 
@@ -76,7 +76,6 @@ class Compute:
             sequence = []
             obj_name = None
             for group in groups:
-
                 for i in range(len(group)):
                     frame = group[i]
 
@@ -88,7 +87,6 @@ class Compute:
                         continue
                     is_last = i == len(group) - 1
                     sequence.append(frame.generate_frame_json(interpolation=(not is_last)))
-
 
             results.append(
                 {
@@ -116,6 +114,7 @@ class Compute:
                 for frame in group:
                     print(frame, sep=" ")
             print("\n")
+
 
 if __name__ == "__main__":
     compute = Compute(file_path="tests/inputs/test_medium_input.txt")
