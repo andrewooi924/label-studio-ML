@@ -2,7 +2,23 @@ import random
 
 
 class FrameData:
+    """
+    Represents data for a single frame of a video.
+    """
+
     def __init__(self, frame_id, id, x, y, w, h, label, label_id):
+        """
+        Initializes a new FrameData object.
+
+        :param frame_id: the ID of the frame
+        :param id: the ID of the object in the frame
+        :param x: the x-coordinate of the object's bounding box
+        :param y: the y-coordinate of the object's bounding box
+        :param w: the width of the object's bounding box
+        :param h: the height of the object's bounding box
+        :param label: the label of the object
+        :param label_id: the ID of the label
+        """
         self.frame_id = int(frame_id)
         self.id = int(id)
         self.x = float(x)
@@ -15,6 +31,12 @@ class FrameData:
         self.label_id = int(label_id)
 
     def generate_frame_json(self, interpolation=False):
+        """
+        Generates a JSON object representing the FrameData object.
+
+        :param interpolation: whether or not the object is being interpolated (True represent start of continuous frames, False represents end of continuous frames)
+        :return: the generated JSON object compatible with Label Studio
+        """
         return {
             "frame": self.frame_id,
             "x": self.x,
@@ -25,38 +47,70 @@ class FrameData:
         }
 
     def __str__(self):
-        # Should be in JSON format
+        """
+        Returns a string representation of the FrameData object in JSON format.
+
+        :return: the string representation
+        """
         return f"frame_id: {self.frame_id}, id: {self.id}, x: {self.x}, y: {self.y}, w: {self.w}, h: {self.h}, label: {self.label}, label_id: {self.label_id}"
 
 
 class Compute:
+    """
+    Performs computation on the data in the input file to generate a JSON output.
+    """
+
     def __init__(self, file_path=None):
+        """
+        Initializes a new Compute object.
+
+        :param file_path: the path to the input file
+        """
         self.file_path = file_path
 
     def _read_file(self):
+        """
+        Reads the input file and returns its contents as a list of lines.
+
+        :return: the list of lines
+        """
         with open(self.file_path) as f:
             lines = f.readlines()
         return lines
 
     def _group_by_id(self, lines):
+        """
+        Groups the FrameData objects in the input lines by object ID and label ID.
+
+        :param lines: the list of input lines
+        :return: the dictionary of grouped FrameData objects
+        """
         cluster = {}
         for line in lines:
             line = line.strip()
             frame_id, id, x, y, w, h, _, _, _, _, label, label_id = line.split(",")
             frame = FrameData(frame_id, id, x, y, w, h, label, label_id)
 
-            # Grouping by two keys, namely frame_id and label_id
+            # grouping by two keys, namely frame_id and label_id
             if (frame.id, frame.label_id) not in cluster:
                 cluster[(frame.id, frame.label_id)] = []
             cluster[(frame.id, frame.label_id)].append(frame)
         return cluster
 
     def _group_by_continuous_frames(self, cluster):
+        """
+        Groups the FrameData objects in the input cluster by continuous frames. Object that is present in consecutive frames
+        are grouped together.
+
+        :param cluster: the dictionary of grouped FrameData objects
+        :return: the dictionary of grouped FrameData objects by continuous frames
+        """
         grouped_cluster = {}
         for (id, label_id), frames in cluster.items():
             groups, group = [], []
             for i, frame in enumerate(frames):
                 if i == 0:
+                    # first frame
                     group.append(frame)
                 else:
                     prev_frame = group[-1]
@@ -71,6 +125,12 @@ class Compute:
         return grouped_cluster
 
     def _generate_ls_json(self, grouped_cluster):
+        """
+        Generates a JSON object representing the input grouped cluster.
+
+        :param grouped_cluster: the dictionary of grouped FrameData objects by continuous frames
+        :return: JSON prediction object in label-studio format
+        """
         results = []
         for (id, label_id), groups in grouped_cluster.items():
             sequence = []
@@ -78,7 +138,6 @@ class Compute:
             for group in groups:
                 for i in range(len(group)):
                     frame = group[i]
-
                     if obj_name is None:
                         obj_name = frame.label
 
@@ -100,6 +159,12 @@ class Compute:
         return {"result": results}
 
     def process(self):
+        """
+        Reads the input file, groups the FrameData objects, groups the FrameData objects by continuous frames,
+        and generates a JSON object representing the grouped cluster.
+
+        :return:  JSON prediction object in label-studio format
+        """
         lines = self._read_file()
         cluster = self._group_by_id(lines)
         grouped_cluster = self._group_by_continuous_frames(cluster)
@@ -107,6 +172,11 @@ class Compute:
         return json_result
 
     def pretty_print_grouped_cluster(self, grouped_cluster):
+        """
+        Pretty prints the input grouped cluster for debugging purposes.
+
+        :param grouped_cluster: the dictionary of grouped FrameData objects by continuous frames
+        """
         for (id, label_id), groups in grouped_cluster.items():
             print(f"ID: {id}, Label ID: {label_id}")
             for group in groups:

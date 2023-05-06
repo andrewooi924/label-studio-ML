@@ -11,9 +11,14 @@ from util import download_public_file, get_metadata_from_url
 
 class AssistedBoundingBox(LabelStudioMLBase):
     """Assisted Bounding Box Labelling Logic
-    - This model helps our frontend to label the videos with the generated bounding boxes for the frontend.
-    - The format of the prediction is as follows
 
+    This class provides the model for labeling the videos with the generated bounding boxes for the frontend.
+
+    :param from_name: A string representing source data block.
+    :param to_name: A string representing target data block.
+    :param labels : The list of labels to use for labeling the data.
+
+    Sample format of the prediction is as follows:
     {
       "value": {
         "framesCount": number, total frames in video
@@ -45,12 +50,11 @@ class AssistedBoundingBox(LabelStudioMLBase):
       "to_name": string,
       "type": string,
       "origin": string
-      }
     }
-
     """
 
     def __init__(self, **kwargs):
+        """Initializes the AssistedBoundingBox model."""
         super(AssistedBoundingBox, self).__init__(**kwargs)
         # you can preinitialize variables with keys needed to extract info from tasks and annotations and form predictions
         from_name, schema = list(self.parsed_label_config.items())[0]
@@ -59,17 +63,25 @@ class AssistedBoundingBox(LabelStudioMLBase):
         self.labels = schema["labels"]
 
     def predict(self, tasks, **kwargs):
-        """This is where inference happens: model returns
-        the list of predictions based on input list of tasks
+        """Returns the list of predictions based on the input list of tasks.
 
-        sample format of tasks:
-        [{'id': 1908, 'data': {'video_url': 'gs://ucf-crime-dataset/Abuse/Abuse001_x264.mp4'}, 'meta': {}, 'created_at': '2023-04-29T14:47:06.171943Z', 'updated_at': '2023-04-29T14:47:06.171976Z', 'is_labeled': False, 'overlap': 1, 'inner_id': 1, 'total_annotations': 0, 'cancelled_annotations': 0, 'total_predictions': 0, 'comment_count': 0, 'unresolved_comment_count': 0, 'last_comment_updated_at': None, 'project': 3, 'updated_by': None, 'file_upload': None, 'comment_authors': [], 'annotations': [], 'predictions': []}]
+        :param tasks: list of input tasks. An example is given as below:
+          [{'id': 1908, 'data': {'video_url': 'gs://ucf-crime-dataset/Abuse/Abuse001_x264.mp4'}, 'meta': {}, 'created_at': '2023-04-29T14:47:06.171943Z', 'updated_at': '2023-04-29T14:47:06.171976Z', 'is_labeled': False, 'overlap': 1, 'inner_id': 1, 'total_annotations': 0, 'cancelled_annotations': 0, 'total_predictions': 0, 'comment_count': 0, 'unresolved_comment_count': 0, 'last_comment_updated_at': None, 'project': 3, 'updated_by': None, 'file_upload': None, 'comment_authors': [], 'annotations': [], 'predictions': []}]
+
+        :return: A list of prediction as required by label studio
         """
         video_url = tasks[0]["data"]["video_url"]
         predictions = self._run_tracker(video_url)
         return [predictions]
 
     def _run_tracker(self, vid_path):
+        """Runs the Yolov8 object tracking algorithm on the given video and returns the list of predictions.
+
+        :param vid_path: path of the input video from GCS. An example is given as below:
+          gs://ucf-crime-dataset/Abuse/Abuse001_x264.mp4
+
+        :returns: A list of prediction as required by label studio
+        """
         results = []
         DIR_PREFIX = str(uuid.uuid4())
 
@@ -81,6 +93,7 @@ class AssistedBoundingBox(LabelStudioMLBase):
 
             download_public_file(bucket_name, video_path, video_destination)
 
+            # run yolov8 model
             command = f"python3 yolov8_tracking/track.py --source {video_destination} --save-txt --save-txt-path {model_output_destination}"
             run(command.split(), check=True)
 
@@ -88,5 +101,6 @@ class AssistedBoundingBox(LabelStudioMLBase):
         except Exception as e:
             print("Error in running tracker with error: " + e)
         finally:
-            shutil.rmtree(DIR_PREFIX)  # remove after successful / error run
+            # remove after successful / error run
+            shutil.rmtree(DIR_PREFIX)
             return results
