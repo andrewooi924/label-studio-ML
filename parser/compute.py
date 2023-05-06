@@ -117,6 +117,6 @@ class Compute:
 
 
 if __name__ == "__main__":
-    compute = Compute(file_path="tests/inputs/test_medium_input.txt")
+    compute = Compute(file_path="examples/test_medium_input.txt")
     json_result = compute.process()
     print(json_result)
