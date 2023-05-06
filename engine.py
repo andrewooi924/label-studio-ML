@@ -6,7 +6,7 @@ from subprocess import run
 
 from label_studio_ml.model import LabelStudioMLBase
 
-from util import download_public_file, get_metadata_from_url
+from utils.gcs import download_public_file, get_metadata_from_url
 
 
 class AssistedBoundingBox(LabelStudioMLBase):
