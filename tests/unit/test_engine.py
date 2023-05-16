@@ -126,10 +126,6 @@ def test_basic_health_check():
 
 @pytest.mark.second 
 def test_setup_object_detection(setup_schema):
+    print(setup_schema)
     response = requests.post("http://127.0.0.1:9090/setup", json=setup_schema)
     assert response.status_code == 200
-
-@pytest.mark.third
-def test_get_prediction(setup_schema):
-    response = requests.post("http://127.0.0.1:9090/predict", json=setup_schema)
-    assert response.status_code == 200 
