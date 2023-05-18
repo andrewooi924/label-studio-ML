@@ -21,6 +21,7 @@ WORKDIR /app
 
 COPY *.py .
 COPY parser/ parser/
+COPY utils/ utils/
 COPY yolov8_tracking/ yolov8_tracking/
 
 EXPOSE 9090
