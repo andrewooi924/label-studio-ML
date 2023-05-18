@@ -130,12 +130,26 @@ def test_setup_object_detection(setup_schema):
     response = requests.post("http://127.0.0.1:9090/setup", json=setup_schema)
     assert response.status_code == 200
 
+def test_versions():
+    response = requests.post("http://127.0.0.1:9090/versions", json={"project": "testing"})
+    assert response.status_code == 200
+
 """
 Do not run this task unless you have a GPU, if not it will take a long time to even process this 10s video. 
 """
-def test_prediction():
+def test_prediction_success():
     tasks = [{'id': 1908, 'data': {'video_url': 'gs://ucf-crime-dataset/Abuse/Abuse029_x264.mp4'}, 'meta': {}, 'created_at': '2023-04-29T14:47:06.171943Z', 'updated_at': '2023-04-29T14:47:06.171976Z', 'is_labeled': False, 'overlap': 1, 'inner_id': 1, 'total_annotations': 0, 'cancelled_annotations': 0, 'total_predictions': 0, 'comment_count': 0, 'unresolved_comment_count': 0, 'last_comment_updated_at': None, 'project': 3, 'updated_by': None, 'file_upload': None, 'comment_authors': [], 'annotations': [], 'predictions': []}]
     response = requests.post("http://127.0.0.1:9090/predict", json= {
       'tasks': tasks,
     })
+
     assert response.status_code == 200
+
+def test_prediction_fail():
+    tasks = [{'id': 1908, 'data': {'video_url': 'non-existent'}, 'meta': {}, 'created_at': '2023-04-29T14:47:06.171943Z', 'updated_at': '2023-04-29T14:47:06.171976Z', 'is_labeled': False, 'overlap': 1, 'inner_id': 1, 'total_annotations': 0, 'cancelled_annotations': 0, 'total_predictions': 0, 'comment_count': 0, 'unresolved_comment_count': 0, 'last_comment_updated_at': None, 'project': 3, 'updated_by': None, 'file_upload': None, 'comment_authors': [], 'annotations': [], 'predictions': []}]
+    response = requests.post("http://127.0.0.1:9090/predict", json= {
+      'tasks': tasks,
+    })
+
+    # If the video does not exist, it should return an empty array
+    assert response.json()['results'] == [[]]
