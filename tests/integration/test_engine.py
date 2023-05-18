@@ -129,3 +129,10 @@ def test_setup_object_detection(setup_schema):
     print(setup_schema)
     response = requests.post("http://127.0.0.1:9090/setup", json=setup_schema)
     assert response.status_code == 200
+  
+def test_project():
+    tasks = [{'id': 1908, 'data': {'video_url': 'gs://ucf-crime-dataset/Abuse/Abuse029_x264.mp4'}, 'meta': {}, 'created_at': '2023-04-29T14:47:06.171943Z', 'updated_at': '2023-04-29T14:47:06.171976Z', 'is_labeled': False, 'overlap': 1, 'inner_id': 1, 'total_annotations': 0, 'cancelled_annotations': 0, 'total_predictions': 0, 'comment_count': 0, 'unresolved_comment_count': 0, 'last_comment_updated_at': None, 'project': 3, 'updated_by': None, 'file_upload': None, 'comment_authors': [], 'annotations': [], 'predictions': []}]
+    response = requests.post("http://127.0.0.1:9090/predict", json= {
+      'tasks': tasks,
+    })
+    assert response.status_code == 200
