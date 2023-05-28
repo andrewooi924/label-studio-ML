@@ -83,24 +83,30 @@ class AssistedBoundingBox(LabelStudioMLBase):
         :returns: A list of prediction as required by label studio
         """
         results = []
+        # generate a random directory to store the video and model output
         DIR_PREFIX = str(uuid.uuid4())
 
         try:
+            # make directory is does not exist
             Path(DIR_PREFIX).mkdir(parents=True, exist_ok=True)
+            # get metadata from url passed in
             bucket_name, video_path, video_name = get_metadata_from_url(vid_path)
             video_destination = Path(f"{DIR_PREFIX}/{video_name}.mp4")
             model_output_destination = Path(f"{DIR_PREFIX}/{video_name}_results")
 
+            # download video from GCS
             download_public_file(bucket_name, video_path, video_destination)
 
             # run yolov8 model
             command = f"python3 yolov8_tracking/track.py --source {video_destination} --save-txt --save-txt-path {model_output_destination}"
             run(command.split(), check=True)
 
+            # run the compute script to parse the labels from Yolov8
             results = Compute(str(model_output_destination) + ".txt").process()
         except Exception as e:
             print("Error in running tracker with error: " + e)
         finally:
-            # remove after successful / error run
+            # remove temp directory after successful / error run
+            # this is used to ensure storage does not get filled up
             shutil.rmtree(DIR_PREFIX)
             return results

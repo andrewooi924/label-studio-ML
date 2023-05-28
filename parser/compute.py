@@ -87,11 +87,12 @@ class Compute:
         """
         cluster = {}
         for line in lines:
+            # strip to remove trailing newline
             line = line.strip()
             frame_id, id, x, y, w, h, _, _, _, _, label, label_id = line.split(",")
             frame = FrameData(frame_id, id, x, y, w, h, label, label_id)
 
-            # grouping by two keys, namely frame_id and label_id
+            # grouping by two keys - frame_id and label_id (treated as primary key)
             if (frame.id, frame.label_id) not in cluster:
                 cluster[(frame.id, frame.label_id)] = []
             cluster[(frame.id, frame.label_id)].append(frame)
@@ -110,10 +111,14 @@ class Compute:
             groups, group = [], []
             for i, frame in enumerate(frames):
                 if i == 0:
-                    # first frame
+                    # no previous group to compare with here
+                    # so we just add the first frame to the group
                     group.append(frame)
                 else:
                     prev_frame = group[-1]
+                    # if the current frame is consecutive to the previous frame
+                    # we add it to the group
+                    # otherwise, we start a new group
                     if prev_frame.frame_id + 1 == frame.frame_id:
                         group.append(frame)
                     else:
@@ -135,9 +140,11 @@ class Compute:
         for (id, label_id), groups in grouped_cluster.items():
             sequence = []
             obj_name = None
+            # iterate over groups of continuous frames
             for group in groups:
                 for i in range(len(group)):
                     frame = group[i]
+                    # set the object name to the label of the first frame in the group
                     if obj_name is None:
                         obj_name = frame.label
 
@@ -145,8 +152,11 @@ class Compute:
                         sequence.append(frame.generate_frame_json(interpolation=False))
                         continue
                     is_last = i == len(group) - 1
+                    # if the group has more than one frame, we interpolate the frames
+                    # by setting the enabled property to False for all frames except the first and last
                     sequence.append(frame.generate_frame_json(interpolation=(not is_last)))
-
+            
+            # append sequence in label studio compatible format
             results.append(
                 {
                     "value": {"sequence": sequence, "labels": [obj_name]},
