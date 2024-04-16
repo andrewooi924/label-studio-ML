@@ -98,7 +98,7 @@ class AssistedBoundingBox(LabelStudioMLBase):
             download_public_file(bucket_name, video_path, video_destination)
 
             # run yolov8 model
-            command = f"python3 yolov8_tracking/track.py --source {video_destination} --save-txt --save-txt-path {model_output_destination}"
+            command = f"python3 yolov8_tracking/track.py --tracking-method bytetrack --source {video_destination} --save-txt --save-txt-path {model_output_destination}"
             run(command.split(), check=True)
 
             # run the compute script to parse the labels from Yolov8
